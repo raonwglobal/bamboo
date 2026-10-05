@@ -7,3 +7,5 @@ build
 .env.local
 .wrangler
 .dev.vars
+.agents/
+AGENTS.md
