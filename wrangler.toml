@@ -1,3 +1,7 @@
 name = "bamboo"
 compatibility_date = "2024-09-23"
-pages_build_output_dir = "out"
+main = "src/worker.js"
+
+[assets]
+directory = "./out"
+binding = "ASSETS"
