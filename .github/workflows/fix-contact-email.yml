@@ -1,0 +1,37 @@
+name: fix-contact-email
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update contact email
+        run: |
+          set -e
+          if grep -q 'hello@b-a.kr' app/page.tsx; then
+            sed -i 's/hello@b-a\.kr/info@bambooasia.biz/g' app/page.tsx
+            echo "Replaced hello@b-a.kr -> info@bambooasia.biz"
+          else
+            echo "hello@b-a.kr not found; checking current contact lines:"
+            grep -n 'info@bambooasia.biz\|hello@\|@b-a' app/page.tsx || true
+          fi
+
+      - name: Commit and push
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add app/page.tsx
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "content: update contact email to info@bambooasia.biz"
+            git push
+          fi
