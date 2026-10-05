@@ -812,7 +812,7 @@ export default function App() {
             <div>
               <div className="font-bold text-[#101828]">Contact</div>
               <div className="mt-3 space-y-2 text-[#667085]">
-                <div>실행 상담하기</div><div>hello@b-a.kr (예시)</div><div>Vietnam • Korea</div>
+                <div>실행 상담하기</div><div>info@bambooasia.biz (예시)</div><div>Vietnam • Korea</div>
               </div>
             </div>
           </div>
