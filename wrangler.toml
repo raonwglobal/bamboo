@@ -1,0 +1,12 @@
+# Cloudflare Pages configuration for BambooAsia
+# Docs: https://developers.cloudflare.com/pages/
+
+name = "bambooasia"
+compatibility_date = "2026-10-01"
+pages_build_output_dir = "."
+
+# Static site: no build command required.
+# In the Cloudflare dashboard, set:
+#   Framework preset = None
+#   Build command    = (empty)
+#   Output directory = /

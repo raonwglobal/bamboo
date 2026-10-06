@@ -1,11 +1,31 @@
-node_modules
-.next
-out
-build
-.DS_Store
-.env
-.env.local
-.wrangler
+# Dependencies / local tooling
+node_modules/
+.npm/
+.yarn/
+
+# Build / framework output (if a multi-file build is added later)
+.next/
+out/
+build/
+dist/
+.wrangler/
 .dev.vars
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+*.log
+.idea/
+.vscode/
+
+# Agent development aids only — not part of the BambooAsia product
 .agents/
 AGENTS.md
+.restore/
+
+# Legacy export name (use index.html)
+Bambooasia (1).html
