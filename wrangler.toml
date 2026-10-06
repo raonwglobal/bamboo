@@ -1,7 +1,0 @@
-name = "bamboo"
-compatibility_date = "2024-09-23"
-main = "src/worker.js"
-
-[assets]
-directory = "./out"
-binding = "ASSETS"
