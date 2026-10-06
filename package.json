@@ -2,10 +2,12 @@
   "name": "bambooasia",
   "version": "1.0.0",
   "private": true,
-  "description": "BambooAsia — Vietnam bamboo circular materials (static site for Cloudflare Pages)",
+  "description": "BambooAsia — Vietnam bamboo circular materials (static site for Cloudflare)",
   "scripts": {
     "build": "node scripts/prepare-static.js",
-    "preview": "npx --yes serve -s ."
+    "deploy": "npm run build && npx --yes wrangler@4 deploy",
+    "pages:deploy": "npm run build && npx --yes wrangler@4 pages deploy dist --project-name=bambooasia",
+    "preview": "npm run build && npx --yes serve -s dist"
   },
   "engines": {
     "node": ">=18"

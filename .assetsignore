@@ -1,0 +1,13 @@
+# Not part of the public website
+.agents
+AGENTS.md
+.restore
+scripts
+package.json
+package-lock.json
+node_modules
+wrangler.toml
+README.md
+LICENSE
+.gitignore
+.git

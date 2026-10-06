@@ -2,7 +2,7 @@
 
 Vietnam bamboo-based **circular materials** platform for architecture, wellness, and tropical R&D.
 
-**Live target:** Cloudflare Pages  
+**Live target:** Cloudflare  
 **Repository:** https://github.com/raonwglobal/bamboo
 
 ---
@@ -33,7 +33,7 @@ Core messaging:
 
 | Path | Role |
 |------|------|
-| `index.html` (and other site assets) | **Project code** — the BambooAsia website |
+| Site HTML + `dist/` build output | **Project code** — the BambooAsia website |
 | `.agents/`, `AGENTS.md`, `luna-chat-coder` | **Not project code** — optional auxiliary tooling for chat-based development only |
 
 The `luna-chat-coder` skill under `.agents/skills/` is a **development aid only**. It must not influence product behavior, branding, or deployment. **No content from `luna-chat-coder` belongs in the shipped website or production configuration.**
@@ -48,102 +48,86 @@ When cloning for production or Cloudflare deploys, treat only the site files as 
 - React (production bundle embedded in the page)
 - Tailwind CSS (inlined)
 - Google Fonts: Inter + Fraunces
-- No Node build step required for Cloudflare Pages static hosting
-
-Primary deliverable:
-
-```text
-index.html   ← production entry (Cloudflare Pages root)
-```
-
-Legacy filename in history: `Bambooasia (1).html` — do not deploy that name; use `index.html`.
+- Build step only prepares `dist/` (no framework compile)
 
 ---
 
-## Cloudflare Pages deployment
+## Cloudflare deployment
 
-### Recommended setup
+This is a **static HTML site**. There is no Worker script entry (`main`). Deployment must either:
 
-1. **Connect** this GitHub repository to [Cloudflare Pages](https://pages.cloudflare.com/).
-2. **Build settings** (Cloudflare Dashboard → Pages → project → Settings → Builds & deployments)
-   - Framework preset: **None** (or leave unset)
-   - **Build command:** leave **empty**  
-     (If the dashboard forces a command, use: `npm run build` — a no-op/static prepare script is provided.)
-   - **Build output directory:** `/` or `.` (repository root — **not** `dist` or `build`)
-   - Root directory: `/` (repo root)
-3. **Root document:** build ensures `index.html` exists at the repository root (from the site bundle or legacy export).
+- use **Cloudflare Pages** (Git integration uploads the **build output directory**), or  
+- use **`wrangler deploy`** with Workers **Static Assets** (`[assets] directory = "./dist"`).
 
-#### Fix for `ENOENT: package.json` / `npm run build` failure
+### Why previous deploys failed
 
-This site is **static HTML**. There is no Node app to compile. The error means the Pages project still has **Build command = `npm run build`** without a matching `package.json`.
+| Error | Root cause |
+|-------|------------|
+| `ENOENT package.json` / `npm run build` | Pages ran `npm run build` but no `package.json` existed |
+| `Missing entry-point to Worker script or to assets directory` | `wrangler.toml` used **Pages-only** `pages_build_output_dir`, while the pipeline ran **`wrangler deploy`** (Workers). Workers require `main` **or** `[assets].directory` |
 
-**Option A (preferred):** Dashboard → clear **Build command** completely → Save → Retry deployment.
+`pages_build_output_dir` and `[assets].directory` are **not interchangeable**. This repo now uses `[assets]` so `wrangler deploy` works.
 
-**Option B:** Keep `npm run build`. This repo now includes `package.json` + `scripts/prepare-static.js` so the command succeeds and prepares `index.html`.
-4. Optional: attach a custom domain (e.g. `bambooasia.vn`) in the Pages project settings and enable HTTPS.
+### A) Cloudflare Pages (Git connected) — recommended
 
-### Local preview with Wrangler
+**Settings → Builds & deployments:**
+
+| Field | Value |
+|-------|--------|
+| Framework preset | **None** |
+| Build command | `npm run build` |
+| Build output directory | **`dist`** |
+| Root directory | `/` (repo root) |
+
+Do **not** set a custom deploy command to `wrangler deploy` unless you intend Workers Static Assets.
+
+After build, Pages uploads `dist/` (contains `index.html`).
+
+### B) Wrangler CLI (Workers Static Assets)
 
 ```bash
-# Install once
-npm i -g wrangler
-
-# Preview the static site (requires index.html at root)
-npx wrangler pages dev .
+npm run build          # writes dist/index.html
+npx wrangler deploy    # uses [assets] directory = "./dist"
 ```
 
-Or deploy from CI / local:
+Or: `npm run deploy`
+
+For classic Pages CLI upload instead:
 
 ```bash
-npx wrangler pages deploy . --project-name=bambooasia
+npm run pages:deploy   # wrangler pages deploy dist --project-name=bambooasia
 ```
 
-`wrangler.toml` in this repo documents the Pages project name and compatibility notes.
+### Local preview
 
-### Current repository state (Cloudflare)
-
-Until `index.html` is present at the repository root, Cloudflare Pages can still serve the site using a rewrite in `_redirects`:
-
-```text
-/ /Bambooasia%20(1).html 200
+```bash
+npm run preview
 ```
-
-**Preferred:** commit a root `index.html` (same content as the site bundle, with title `BambooAsia — Vietnam Bamboo Circular Materials`) and remove the rewrite. The legacy filename should not remain the long-term public URL.
-
-`npm run build` will create `index.html` from the legacy export during the Pages build if it is still missing.
 
 ### Production checklist
 
-- [ ] Entry file is `index.html` at repo root (created by `npm run build` from the site bundle if needed)
-- [x] `<title>` and meta description set for BambooAsia
-- [ ] Custom domain + DNS (Cloudflare)
-- [ ] Optional `_headers` / caching rules for static assets
-- [ ] Confirm no agent-only files are required at runtime (they are not)
-
-### Known static-hosting notes
-
-- The page is a client-rendered React artifact. There is no server-side routing; a single `index.html` is sufficient.
-- External font CSS is loaded from Google Fonts; ensure the deployment network allows that origin, or self-host fonts later if policy requires.
-- File size is large (~2.6 MB) because styles and React runtime are inlined. Acceptable for Pages; consider code-splitting only if you later move to a multi-file build.
-
----
+- [x] `npm run build` creates `dist/index.html`
+- [x] `wrangler.toml` has `[assets] directory = "./dist"` (fixes missing entry-point)
+- [ ] Cloudflare dashboard **Build output directory = `dist`**
+- [ ] Custom domain + DNS
+- [ ] Agent paths (`.agents`, `luna-chat-coder`) are **not** product code and are not required at runtime
 
 ## Repository layout (product-relevant)
 
 ```text
 .
-├── index.html                 # BambooAsia site (production entry; created at build if missing)
-├── package.json               # Allows `npm run build` on Cloudflare (static prepare only)
-├── scripts/prepare-static.js  # Ensures index.html exists; no framework compile
+├── Bambooasia (1).html        # Site source (HTML artifact)
+├── package.json               # npm run build → dist/
+├── scripts/prepare-static.js  # Copies/normalizes site into dist/
+├── wrangler.toml              # [assets] directory = "./dist"
+├── _headers / _redirects      # Copied into dist/ at build
+├── dist/                      # Build output (generated, gitignored)
 ├── README.md
 ├── LICENSE
-├── wrangler.toml
-├── _redirects
-├── _headers
 └── .gitignore
 ```
 
-Agent / recovery paths (`.agents/`, `AGENTS.md`, `.restore/`) may exist in the Git history for developer convenience. They are **out of scope** for the product and for Cloudflare runtime.
+Agent paths (`.agents/`, `AGENTS.md`, `luna-chat-coder`, `.restore/`) are **development aids only** — not product code, not required for deploy.
 
 ---
 

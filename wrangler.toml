@@ -1,12 +1,13 @@
-# Cloudflare Pages configuration for BambooAsia
-# Docs: https://developers.cloudflare.com/pages/
+# BambooAsia — static site on Cloudflare (Workers Static Assets / Pages-compatible)
+# https://developers.cloudflare.com/workers/static-assets/
 
 name = "bambooasia"
-compatibility_date = "2026-10-01"
-pages_build_output_dir = "."
+compatibility_date = "2026-10-06"
 
-# Static site: no build command required.
-# In the Cloudflare dashboard, set:
-#   Framework preset = None
-#   Build command    = (empty)
-#   Output directory = /
+# Required for `wrangler deploy` (do NOT use pages_build_output_dir here —
+# that marks a Pages-only config and makes `wrangler deploy` fail with
+# "Missing entry-point to Worker script or to assets directory").
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"
+html_handling = "auto-trailing-slash"
