@@ -65,11 +65,21 @@ Legacy filename in history: `Bambooasia (1).html` — do not deploy that name; u
 ### Recommended setup
 
 1. **Connect** this GitHub repository to [Cloudflare Pages](https://pages.cloudflare.com/).
-2. **Build settings**
-   - Framework preset: **None** (static)
-   - Build command: *(leave empty)*
-   - Build output directory: `/` (repository root)
-3. **Root document:** `index.html` must exist at the repository root.
+2. **Build settings** (Cloudflare Dashboard → Pages → project → Settings → Builds & deployments)
+   - Framework preset: **None** (or leave unset)
+   - **Build command:** leave **empty**  
+     (If the dashboard forces a command, use: `npm run build` — a no-op/static prepare script is provided.)
+   - **Build output directory:** `/` or `.` (repository root — **not** `dist` or `build`)
+   - Root directory: `/` (repo root)
+3. **Root document:** build ensures `index.html` exists at the repository root (from the site bundle or legacy export).
+
+#### Fix for `ENOENT: package.json` / `npm run build` failure
+
+This site is **static HTML**. There is no Node app to compile. The error means the Pages project still has **Build command = `npm run build`** without a matching `package.json`.
+
+**Option A (preferred):** Dashboard → clear **Build command** completely → Save → Retry deployment.
+
+**Option B:** Keep `npm run build`. This repo now includes `package.json` + `scripts/prepare-static.js` so the command succeeds and prepares `index.html`.
 4. Optional: attach a custom domain (e.g. `bambooasia.vn`) in the Pages project settings and enable HTTPS.
 
 ### Local preview with Wrangler
@@ -100,9 +110,11 @@ Until `index.html` is present at the repository root, Cloudflare Pages can still
 
 **Preferred:** commit a root `index.html` (same content as the site bundle, with title `BambooAsia — Vietnam Bamboo Circular Materials`) and remove the rewrite. The legacy filename should not remain the long-term public URL.
 
+`npm run build` will create `index.html` from the legacy export during the Pages build if it is still missing.
+
 ### Production checklist
 
-- [x] Entry file is `index.html` (not a spaced / numbered export name)
+- [ ] Entry file is `index.html` at repo root (created by `npm run build` from the site bundle if needed)
 - [x] `<title>` and meta description set for BambooAsia
 - [ ] Custom domain + DNS (Cloudflare)
 - [ ] Optional `_headers` / caching rules for static assets
@@ -120,12 +132,14 @@ Until `index.html` is present at the repository root, Cloudflare Pages can still
 
 ```text
 .
-├── index.html          # BambooAsia site (production entry)
-├── README.md           # This file
+├── index.html                 # BambooAsia site (production entry; created at build if missing)
+├── package.json               # Allows `npm run build` on Cloudflare (static prepare only)
+├── scripts/prepare-static.js  # Ensures index.html exists; no framework compile
+├── README.md
 ├── LICENSE
-├── wrangler.toml       # Cloudflare Pages hints
-├── _redirects          # Cloudflare Pages URL rules
-├── _headers            # Security and cache headers
+├── wrangler.toml
+├── _redirects
+├── _headers
 └── .gitignore
 ```
 
