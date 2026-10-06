@@ -90,6 +90,16 @@ npx wrangler pages deploy . --project-name=bambooasia
 
 `wrangler.toml` in this repo documents the Pages project name and compatibility notes.
 
+### Current repository state (Cloudflare)
+
+Until `index.html` is present at the repository root, Cloudflare Pages can still serve the site using a rewrite in `_redirects`:
+
+```text
+/ /Bambooasia%20(1).html 200
+```
+
+**Preferred:** commit a root `index.html` (same content as the site bundle, with title `BambooAsia — Vietnam Bamboo Circular Materials`) and remove the rewrite. The legacy filename should not remain the long-term public URL.
+
 ### Production checklist
 
 - [x] Entry file is `index.html` (not a spaced / numbered export name)
@@ -114,6 +124,8 @@ npx wrangler pages deploy . --project-name=bambooasia
 ├── README.md           # This file
 ├── LICENSE
 ├── wrangler.toml       # Cloudflare Pages hints
+├── _redirects          # Cloudflare Pages URL rules
+├── _headers            # Security and cache headers
 └── .gitignore
 ```
 

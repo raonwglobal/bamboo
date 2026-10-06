@@ -1,0 +1,3 @@
+# Cloudflare Pages: serve the site entry at /
+# Prefer index.html once it is published at repo root.
+/ /Bambooasia%20(1).html 200
